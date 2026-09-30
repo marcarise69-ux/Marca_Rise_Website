@@ -24,35 +24,176 @@ const SUGGESTIONS = [
 ];
 
 const QUICK_ACTIONS = [
-  { icon: ShieldCheck, label: "Verify Certificate", prompt: "I want to verify a certificate" },
-  { icon: Briefcase, label: "Services Provided by Marca Rise", prompt: "What services does Marca Rise offer?" },
+  { icon: ShieldCheck, label: "Verify My Certificate", prompt: "I want to verify a certificate" },
+  { icon: Briefcase, label: "Our Services ✨", prompt: "What services does Marca Rise offer?" },
   { icon: Users, label: "Meet Founder", prompt: "Who are the founders of Marca Rise?" },
   { icon: Info, label: "About Marca Rise", prompt: "Tell me about Marca Rise" },
 ];
 
 const WELCOME =
-  "Hey! I'm MAJA — but Sam calls me MJ. ✦ I can help you verify your internship certificate, learn about Marca Rise, explore our services, or meet our founders.";
+  "Hey! I'm MJ. ✦ I can help you verify your internship certificate, learn about Marca Rise, explore our services, or meet our founders.";
 
 const CERT_RE = /[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+/;
 const URL_RE = /(https?:\/\/[^\s)]+)/g;
 
-function renderText(text: string) {
-  const parts = text.split(URL_RE);
-  return parts.map((p, i) =>
-    /^https?:\/\//.test(p) ? (
-      <a
-        key={i}
-        href={p}
-        target="_blank"
-        rel="noreferrer"
-        className="text-purple-600 underline font-semibold break-words hover:text-purple-800"
-      >
-        {p}
-      </a>
-    ) : (
-      <span key={i}>{p}</span>
-    )
+function renderInline(text: string) {
+  const tokens = text.split(
+    /(\*\*[^*]+\*\*|https?:\/\/[^\s)]+|\*[^*]+\*)/g
   );
+
+  return tokens.map((token, index) => {
+    if (!token) return null;
+
+    // Bold
+    if (token.startsWith("**") && token.endsWith("**")) {
+      return (
+        <strong
+          key={index}
+          className="font-bold text-slate-900"
+        >
+          {token.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    // Italic
+    if (token.startsWith("*") && token.endsWith("*")) {
+      return (
+        <em key={index} className="italic">
+          {token.slice(1, -1)}
+        </em>
+      );
+    }
+
+    // URL
+    if (/^https?:\/\//.test(token)) {
+      return (
+        <a
+          key={index}
+          href={token}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-purple-600 underline underline-offset-2 break-all hover:text-purple-800"
+        >
+          {token}
+        </a>
+      );
+    }
+
+    return <span key={index}>{token}</span>;
+  });
+}
+
+function renderText(text: string) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+
+  const elements: React.ReactNode[] = [];
+
+  let bulletItems: string[] = [];
+
+  const flushBullets = () => {
+    if (!bulletItems.length) return;
+
+    elements.push(
+      <ul
+        key={`bullets-${elements.length}`}
+        className="my-2.5 space-y-2 pl-5 list-disc marker:text-purple-500"
+      >
+        {bulletItems.map((item, index) => (
+          <li
+            key={index}
+            className="pl-1 leading-6"
+          >
+            {renderInline(item)}
+          </li>
+        ))}
+      </ul>
+    );
+
+    bulletItems = [];
+  };
+
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.trim();
+
+    // Empty line = paragraph spacing
+    if (!line) {
+      flushBullets();
+
+      elements.push(
+        <div
+          key={`space-${index}`}
+          className="h-2"
+        />
+      );
+
+      return;
+    }
+
+    // Markdown heading
+    if (/^#{1,3}\s+/.test(line)) {
+      flushBullets();
+
+      const heading = line.replace(/^#{1,3}\s+/, "");
+
+      elements.push(
+        <div
+          key={`heading-${index}`}
+          className="mt-1 mb-2 text-[15px] font-bold text-slate-900"
+        >
+          {renderInline(heading)}
+        </div>
+      );
+
+      return;
+    }
+
+    // Bullet: -, •, *
+    if (/^[-•*]\s+/.test(line)) {
+      bulletItems.push(line.replace(/^[-•*]\s+/, ""));
+      return;
+    }
+
+    // Numbered list
+    if (/^\d+\.\s+/.test(line)) {
+      flushBullets();
+
+      const match = line.match(/^(\d+)\.\s+(.*)$/);
+
+      elements.push(
+        <div
+          key={`number-${index}`}
+          className="flex gap-2 my-1.5 leading-6"
+        >
+          <span className="font-bold text-purple-600 shrink-0">
+            {match?.[1]}.
+          </span>
+
+          <span>
+            {renderInline(match?.[2] || line)}
+          </span>
+        </div>
+      );
+
+      return;
+    }
+
+    // Normal paragraph
+    flushBullets();
+
+    elements.push(
+      <p
+        key={`paragraph-${index}`}
+        className="leading-6 mb-2"
+      >
+        {renderInline(line)}
+      </p>
+    );
+  });
+
+  flushBullets();
+
+  return <div className="space-y-0.5">{elements}</div>;
 }
 
 const uid = () => Math.random().toString(36).slice(2);
@@ -428,13 +569,13 @@ function MessageRow({ m }: { m: Msg }) {
           className="w-8 h-8 rounded-full object-cover shrink-0 bg-white border border-purple-100"
         />
       )}
-      <div className={`max-w-[80%] ${isUser ? "items-end" : "items-start"} flex flex-col gap-2`}>
+      <div className={`max-w-[88%] ${isUser ? "items-end" : "items-start"} flex flex-col gap-2`}>
         {m.text && (
           <div
             className={
               isUser
                 ? "rounded-2xl rounded-br-sm px-4 py-2.5 text-sm text-white shadow-sm"
-                : "rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm text-slate-800 bg-white border border-purple-100 shadow-sm"
+                : "rounded-2xl rounded-bl-sm px-4 py-3 text-[14px] leading-6 text-slate-800 bg-white border border-purple-100 shadow-sm"
             }
             style={
               isUser

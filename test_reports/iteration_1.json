@@ -22,9 +22,9 @@
   "updated_files": ["/app/backend/tests/backend_test.py"],
   "success_rate": {"backend": "100% (21/21)", "frontend": "100% of tested flows"},
   "test_credentials": "admin@marcarise.in / MarcaRise@2026",
-  "seed_data_creation": "Test created and cleaned up MR26-DS-00500 and MR26-DS-00501 via Excel import commit. MR26-FS-00128 has been updated by the 'update' duplicate_mode test (student_name now 'Arun Kumar UPDATED' from sample xlsx). If original name matters, main agent may want to re-seed MR26-FS-00128.",
+  "seed_data_creation": "Test created and cleaned up MR26-DS-00500 and MR26-DS-00501 via Excel import commit. MR00-XX-00000 has been updated by the 'update' duplicate_mode test (student_name now 'Arun Kumar UPDATED' from sample xlsx). If original name matters, main agent may want to re-seed MR00-XX-00000.",
   "retest_needed": false,
   "should_main_agent_self_test": false,
-  "context_for_next_testing_agent": "Backend regression suite lives at /app/backend/tests/backend_test.py (pytest, 21 tests, uses REACT_APP_BACKEND_URL). MJ launcher is bottom-left with data-testid='mj-launcher'; Book a call widget is bottom-right (CalendlyCard); both mount on all pages including /admin. Admin auth: Bearer token in localStorage 'mr_admin_token'. Sample xlsx has 3 rows, MR26-FS-00128 is the duplicate.",
+  "context_for_next_testing_agent": "Backend regression suite lives at /app/backend/tests/backend_test.py (pytest, 21 tests, uses REACT_APP_BACKEND_URL). MJ launcher is bottom-left with data-testid='mj-launcher'; Book a call widget is bottom-right (CalendlyCard); both mount on all pages including /admin. Admin auth: Bearer token in localStorage 'mr_admin_token'. Sample xlsx has 3 rows, MR00-XX-00000 is the duplicate.",
   "rca of the issue": "N/A — no failures."
 }

@@ -73,11 +73,11 @@ class TestAdminData:
         assert d["limit"] == 5
 
     def test_list_search(self, auth_headers):
-        r = requests.get(f"{API}/admin/certificates?search=MR26-FS-00128", headers=auth_headers, timeout=15)
+        r = requests.get(f"{API}/admin/certificates?search=MR00-XX-00000", headers=auth_headers, timeout=15)
         assert r.status_code == 200
         d = r.json()
         assert d["total"] >= 1
-        assert any(i["certificate_id"] == "MR26-FS-00128" for i in d["items"])
+        assert any(i["certificate_id"] == "MR00-XX-00000" for i in d["items"])
 
     def test_list_status_filter(self, auth_headers):
         r = requests.get(f"{API}/admin/certificates?status=revoked", headers=auth_headers, timeout=15)
@@ -89,7 +89,7 @@ class TestAdminData:
 # ---------- Chat / verification ----------
 class TestChatVerification:
     def test_verify_active(self):
-        r = requests.post(f"{API}/chat", json={"message": "Verify MR26-FS-00128"}, timeout=30)
+        r = requests.post(f"{API}/chat", json={"message": "Verify MR00-XX-00000"}, timeout=30)
         assert r.status_code == 200
         d = r.json()
         assert d["type"] == "certificate"
@@ -97,7 +97,7 @@ class TestChatVerification:
         assert d["mascot"] == "success"
         cert = d["certificate"]
         assert cert is not None
-        assert cert["certificate_id"] == "MR26-FS-00128"
+        assert cert["certificate_id"] == "MR00-XX-00000"
         # public fields only
         assert "student_id" not in cert
         assert "remarks" not in cert
@@ -125,7 +125,7 @@ class TestChatVerification:
 
     def test_followup_with_context(self):
         # First fetch cert
-        r = requests.post(f"{API}/chat", json={"message": "Verify MR26-FS-00128"}, timeout=30)
+        r = requests.post(f"{API}/chat", json={"message": "Verify MR00-XX-00000"}, timeout=30)
         cert = r.json()["certificate"]
         r2 = requests.post(f"{API}/chat", json={
             "message": "What project did this student work on?",
@@ -191,7 +191,7 @@ class TestExcelImport:
         d = r.json()
         assert d["total"] == 3
         assert d["existing_count"] == 1
-        assert "MR26-FS-00128" in d["existing_ids"]
+        assert "MR00-XX-00000" in d["existing_ids"]
         # store rows for commit test
         TestExcelImport.rows = d["rows"]
 

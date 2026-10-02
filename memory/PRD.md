@@ -34,7 +34,7 @@ Integrate a futuristic floating AI chatbot (MJ), certificate verification, and a
 - First-open **certificate popup** (once per session via sessionStorage; gated off `/admin`); CTA opens MJ and prefills "VERIFY ".
 - Mobile chatbot moved to **left-middle** (desktop stays bottom-left); no overlap with Book a call.
 - Launcher icon replaced with circular **Marca Rise logo** (marca_logo.jpg).
-- Quick actions: Verify My Certificate / Our Services ✨ / Meet Founder / About Marca Rise (removed "Talk with MJ" and "Meet CEO").
+- Quick actions: Verify Certificate / Our Services ✨ / Meet Founders / About Marca Rise (removed "Talk with MJ" and "Meet CEO").
 - MJ identity: MJ = MAJA, owner Sam; founder answers include real LinkedIn URLs (princesamuel69, sanjay-sid) rendered clickable; no-markdown persona rule.
 - Admin credentials changed to saxluyz@gmail.com / 1234.
 - Testing: 24/24 backend pytest passed; all iteration-2 frontend flows passed.

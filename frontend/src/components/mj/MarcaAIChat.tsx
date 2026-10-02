@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, X, Send, ShieldCheck, Users, Briefcase, Info } from "lucide-react";
+import {
+  Sparkles,
+  X,
+  Send,
+  ShieldCheck,
+  Users,
+  Briefcase,
+  Info,
+  Clock3,
+} from "lucide-react";
 import { API } from "@/lib/mjApi";
 import { mascotFor } from "@/lib/mascots";
 import { CertificateVerificationCard } from "./CertificateVerificationCard";
@@ -24,9 +33,9 @@ const SUGGESTIONS = [
 ];
 
 const QUICK_ACTIONS = [
-  { icon: ShieldCheck, label: "Verify My Certificate", prompt: "I want to verify a certificate" },
+  { icon: ShieldCheck, label: "Verify Certificate", prompt: "I want to verify a certificate" },
   { icon: Briefcase, label: "Our Services ✨", prompt: "What services does Marca Rise offer?" },
-  { icon: Users, label: "Meet Founder", prompt: "Who are the founders of Marca Rise?" },
+  { icon: Users, label: "Meet Founders", prompt: "Who are the founders of Marca Rise?" },
   { icon: Info, label: "About Marca Rise", prompt: "Tell me about Marca Rise" },
 ];
 
@@ -199,10 +208,11 @@ function renderText(text: string) {
 const uid = () => Math.random().toString(36).slice(2);
 
 export default function MarcaAIChat() {
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+ const [open, setOpen] = useState(false);
+const [messages, setMessages] = useState<Msg[]>([]);
+const [input, setInput] = useState("");
+const [loading, setLoading] = useState(false);
+const [showInitNotice, setShowInitNotice] = useState(true);
   const [mascot, setMascot] = useState("hello");
   const [bubbleIdx, setBubbleIdx] = useState(0);
   const [showBubble, setShowBubble] = useState(false);
@@ -282,11 +292,18 @@ export default function MarcaAIChat() {
           certStatus: data.status,
         };
         setMessages((m) => [...m, asst]);
+
+        // Hide the initialization notice after the first AI response
+        setShowInitNotice(false);
+
         setMascot(data.mascot || "explaining");
         if (data.type === "certificate" && data.status === "verified" && data.certificate) {
           setLastCert(data.certificate);
         }
       } catch {
+        // Hide the initialization notice if the first request fails too
+        setShowInitNotice(false);
+
         setMessages((m) => [
           ...m,
           {
@@ -336,7 +353,7 @@ export default function MarcaAIChat() {
     <>
       {/* ================= FLOATING ICON (fixed anchor; icon never moves) ================= */}
       <div
-        className="fixed z-[99998] w-16 h-16 left-4 top-[75vh] -translate-y-1/2 sm:left-6 sm:top-auto sm:bottom-6 sm:translate-y-0"
+       className="fixed z-[999999] w-16 h-16 left-4 top-[75vh] -translate-y-1/2 sm:left-6 sm:top-auto sm:bottom-6 sm:translate-y-0"
         style={{ pointerEvents: open ? "none" : "auto" }}
       >
         {/* suggestion bubble — absolutely anchored to the icon, does NOT affect its position */}
@@ -350,12 +367,12 @@ export default function MarcaAIChat() {
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
               onClick={openChat}
               data-testid="mj-suggestion-bubble"
-              className="absolute left-0 top-full mt-3 sm:top-auto sm:bottom-full sm:mt-0 sm:mb-3 w-[280px] max-w-[calc(100vw-32px)] text-left rounded-2xl bg-white border border-purple-200 px-4 py-2.5 text-[13px] font-semibold text-slate-700"
+             className="absolute left-0 bottom-full mb-3 w-[280px] max-w-[calc(100vw-32px)] text-left rounded-2xl bg-white border border-purple-200 px-4 py-2.5 text-[13px] font-semibold text-slate-700 z-[1000000]"
               style={{ boxShadow: "0 0 0 1px rgba(168,85,247,0.15),0 10px 30px rgba(124,12,231,0.18)" }}
             >
               {SUGGESTIONS[bubbleIdx]}
               {/* arrow: points UP toward icon on mobile, DOWN on desktop */}
-              <span className="absolute left-6 w-3 h-3 rotate-45 bg-white -top-1.5 border-t border-l sm:top-auto sm:-bottom-1.5 sm:border-t-0 sm:border-l-0 sm:border-b sm:border-r border-purple-200" />
+              <span className="absolute left-6 -bottom-1.5 w-3 h-3 rotate-45 bg-white border-b border-r border-purple-200" />
             </motion.button>
           )}
         </AnimatePresence>
@@ -474,6 +491,37 @@ export default function MarcaAIChat() {
                   "linear-gradient(180deg,#faf8ff 0%,#f3eeff 100%)",
               }}
             >
+              {/* ================= AI INITIALIZATION NOTICE ================= */}
+              <AnimatePresence>
+                {showInitNotice && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{ opacity: 0, y: -6, height: 0 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="mb-3"
+                  >
+                    <div className="flex items-start gap-2.5 rounded-xl border border-purple-200/80 bg-purple-50/80 px-3 py-2.5 shadow-sm">
+                      {/* Small clock / initialization icon */}
+                      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                        <Clock3 size={13} strokeWidth={2.2} />
+                      </div>
+
+                      <div className="min-w-0 leading-tight">
+                        <div className="text-[11px] font-bold text-purple-800">
+                          AI Assistant is getting ready...
+                        </div>
+
+                        <div className="mt-0.5 text-[10px] leading-4 text-slate-600">
+                          Your first response may take <strong>2–3 minutes</strong>{" "}
+                          while the service initializes. Subsequent replies will be faster.
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {messages.map((m) => (
                 <MessageRow key={m.id} m={m} />
               ))}
